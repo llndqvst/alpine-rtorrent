@@ -4,7 +4,7 @@
 dht.mode.set = auto
 
 ## Default session directory. Make sure you don t run multiple instance of rtorrent using the same session directory.
-method.insert = cfg.dht_session, private|const|string, (cat,(cfg.basedir), ".dht_session/")
+method.insert = cfg.dht_session, private|const|string, (cat,(cfg.session), ".dht_session/")
 execute.throw = sh, -c, (cat, "mkdir -p " , (cfg.dht_session))
 
 ## UDP port to use for DHT.

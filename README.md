@@ -48,22 +48,29 @@ If it's not your intention to control rTorrent from a third-party application, d
 
 ## Volumes
 
-There is a volume which maps the directory that rTorrent uses to store session data.
-This is useful for a couple of reasons.  
-~~*First*, when the container is badly stopped and the daemon does not have time to remove its [lock file](https://en.wikipedia.org/wiki/File_locking), you can easily access it from the host system and delete it by yourself.~~ Lock file has been disabled from [this commit](https://github.com/StayPirate/alpine-rtorrent/commit/e668903b304410b45de0e7f4ad245258f805c8a1), the container can now be automatically restarted.  
-*Second*, all the information about the downloading torrents will be preserved. Don't forget that it is not a named volume, you need to know the hash of the volume created by your container and you can get it with ```docker container inspect --format '{{ .Mounts }}' rtorrent```. If you prefer, a named volume can be passed by command line which overrides the one in the Dockerfile. It will ensure the operation of switching containers easier. To do it, you need to pass ```-v rtorrent_session:/home/rtorrent/rtorrent/.session``` at container creation time.
-
-## Bind Mounts
-
-There are two directories that should be mapped outside the container.
- - ```/home/rtorrent/rtorrent/download```
+There are three directories that should be mapped outside the container.
+ - ```/download```
    This is the directory where downloaded and downloading files are stored. Leaving this folder inside the container is either inconvenient and not a good practice.  
    You can create a ```Download``` folder on the host system and maps it with the above-mentioned path at container creation time.
    
- - ```/home/rtorrent/rtorrent/watch```
+ - ```/watch```
    The use of this directory is not mandatory, so you should outside map it only if you actually use it.  
    The first time you will run the container, two folders will be created as sub-directories: ```watch/load``` and ```watch/start```. These two new folders are constantly watched by the rTorrent daemon, and as soon as you drop a ```.torrent``` file on them it would be either loaded or started.
 
+ - ```/session```
+   This directory contains information about you current session. If it is not mapped outside the container all session data will dissapear when the container is deleted.
+   
+### Optional volumes
+
+ There is also a optional volume for config
+ - ```/config```
+   This volume contains the user config, and the default command is set to run the .rtorrent.rc in this folder. If you wish to use your own config you can mount a directory with .rtorrent.rc in this volume.
+
+
+## User and group setting
+
+ This image has been changed to allow running rtorrent with any arbitrary user. Use the docker function ```--user``` to set the rtorrent user.
+ 
 ## Logs
 
 To let rTorrent becomes more docker compliant, I've configured logs to be written on ```/dev/stdout```. In this way, it is possible to catch them with [docker logs](https://docs.docker.com/engine/reference/commandline/logs/).  

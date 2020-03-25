@@ -1,31 +1,60 @@
 FROM alpine
 
-LABEL maintainer="Gianluca Gabrielli" mail="tuxmealux+dockerhub@protonmail.com"
+LABEL maintainer="Lukas Lindqvist" mail="lukas.lndqvst@gmail.com"
 LABEL description="rTorrent on Alpine Linux, with a better Docker integration."
-LABEL website="https://github.com/TuxMeaLux/alpine-rtorrent"
-LABEL version="1.0"
+LABEL website="https://gitlab.com/llindqvist/alpine-rtorrent"
+LABEL version="2.0"
 
-ARG UGID=666
+ENV RTUID 2000
+ENV RTGID 2000
+ENV RTHOME /home/rtorrent
 
-RUN addgroup -g $UGID rtorrent && \
-    adduser -S -u $UGID -G rtorrent rtorrent && \
-    apk add --no-cache rtorrent && \
-    mkdir -p /home/rtorrent/rtorrent/config.d && \
-    mkdir /home/rtorrent/rtorrent/.session && \
-    mkdir /home/rtorrent/rtorrent/download && \
-    mkdir /home/rtorrent/rtorrent/watch && \
-    chown -R rtorrent:rtorrent /home/rtorrent/rtorrent
+RUN addgroup \
+    -S -g "$RTGID" \
+    rtorrent && \
+    adduser \
+    -S -H -D \
+    -h "$RTHOME" \
+    -s /bin/bash \
+    -u "$RTUID" \
+    -G rtorrent \
+    rtorrent && \
+    mkdir -p "$RTHOME" && \
+    chown -R rtorrent:rtorrent "$RTHOME"
 
-COPY --chown=rtorrent:rtorrent config.d/ /home/rtorrent/rtorrent/config.d/
-COPY --chown=rtorrent:rtorrent .rtorrent.rc /home/rtorrent/
+# Install rtorrent and su-exec
+# Create necessary folders
+# Forward Info & Error logs to std{out,err} (à la nginx)
 
-VOLUME /home/rtorrent/rtorrent/.session
+RUN apk add --no-cache \
+      rtorrent \
+      setpriv && \
+      ln -sf /dev/stdout /var/log/rtorrent-info.log && \
+      ln -sf /dev/stderr /var/log/rtorrent-error.log
+
+COPY docker-entrypoint.sh /usr/local/bin/
+COPY .rtorrent.rc /config/
+COPY config.d /config/config.d
+
+ENV RTBASE /
+ENV RTSESSION /session
+ENV RTWATCH /watch
+ENV RTCONFIG /config
+ENV RTDOWNLOAD /download
+
+ENV RTDIRS "$RTSESSION $RTWATCH $RTDOWNLOAD"
+
+RUN mkdir -p $RTDIRS && \
+    chown -R rtorrent:rtorrent $RTDIRS
+
+VOLUME ["/session", "/watch", "/config", "/download"]
 
 EXPOSE 16891
-EXPOSE 6881
-EXPOSE 6881/udp
 EXPOSE 50000
+EXPOSE 50000/udp
 
 USER rtorrent
 
-CMD ["rtorrent"]
+ENTRYPOINT ["docker-entrypoint.sh"]
+
+CMD ["rtorrent", "-n", "-o", "import=/config/.rtorrent.rc"]
