@@ -12,6 +12,8 @@ method.insert = cfg.download, private|const|string, (cat,(cfg.basedir),"download
 method.insert = cfg.session,  private|const|string, (cat,(cfg.basedir),"session/")
 method.insert = cfg.watch,    private|const|string, (cat,(cfg.basedir),"watch/")
 
+method.insert = cfg.port,     private|const|string, (system.env,RTPORT)
+
 execute.throw = sh, -c, (cat,\
     "mkdir -p \"",(cfg.watch),"/load\" ",\
     "\"",(cfg.watch),"/start\" ")
@@ -22,7 +24,7 @@ execute.throw = sh, -c, (cat,\
 session.use_lock.set = no
 
 ## Listening port for incoming peer traffic (fixed; you can also randomize it)
-network.port_range.set = 50000-50000
+network.port_range.set = (cat,(cfg.port),"-",(cfg.port))
 network.port_random.set = no
 
 # Set whether the client should try to connect to UDP trackers.
