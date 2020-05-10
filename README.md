@@ -2,7 +2,7 @@
 
 ![Docker Pulls](https://img.shields.io/docker/pulls/llndqvst/alpine-rtorrent)
 
-Prebuild images for amd64 and arm64 can be found in the docker hub repository above.
+Prebuild images for amd64 and arm64 can be found here [alpine-rtorrent](https://hub.docker.com/r/llndqvst/alpine-rtorrent)
 
 This is one of the thousands dockerized [rTorrent](https://github.com/rakshasa/rtorrent) images. I opted to create my own one for the two following main reasons:
 
