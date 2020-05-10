@@ -1,5 +1,9 @@
 # rTorrent Docker Image
 
+https://img.shields.io/docker/pulls/llndqvst/alpine-rtorrent
+
+Prebuild images for amd64 and arm64 can be found in the docker hub repository above.
+
 This is one of the thousands dockerized [rTorrent](https://github.com/rakshasa/rtorrent) images. I opted to create my own one for the two following main reasons:
 
  - Make practice with Docker.
